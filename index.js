@@ -2,18 +2,17 @@ const express = require('express');
 const mysql = require('mysql2');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 const conexion = {
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  port: process.env.MYSQLPORT,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE
-};
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    port: process.env.MYSQLPORT,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE
+  }
 
-console.log("RT::", conexion);
-
+console.log("RT::", conexion)
 const connection = mysql.createConnection(conexion);
 
 connection.connect(err => {
@@ -36,7 +35,7 @@ app.get('/personas', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  res.send("hola asbell");
+   res.send("hola asbell")
 });
 
 app.listen(PORT, () => {
