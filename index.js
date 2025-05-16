@@ -1,50 +1,44 @@
-require('dotenv').config();
 const express = require('express');
-const mysql = require('mysql2/promise');
+const mysql = require('mysql2');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const dbConfig = {
-  host: process.env.MYSQL_HOST,
-  user: process.env.MYSQL_USER,
-  password: process.env.MYSQL_PASSWORD,
-  database: process.env.MYSQL_DATABASE,
-  port: process.env.MYSQL_PORT || 3306,
+const conexion = {
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  port: process.env.MYSQLPORT,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE
 };
 
-app.use(express.json());
+console.log("RT::", conexion);
 
-app.get('/personas', async (req, res) => {
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [rows] = await connection.query('SELECT * FROM personas');
-    connection.end();
-    res.json(rows);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
+const connection = mysql.createConnection(conexion);
+
+connection.connect(err => {
+  if (err) {
+    console.error('Error conectando a la base de datos:', err.stack);
+    return;
   }
+  console.log('Conectado a la base de datos.');
 });
 
-app.post('/personas', async (req, res) => {
-  const { nombre, edad } = req.body;
-  if (!nombre || !edad) {
-    return res.status(400).json({ error: "Faltan campos 'nombre' o 'edad'" });
-  }
+app.get('/personas', (req, res) => {
+  connection.query('SELECT * FROM person', (error, results) => {
+    if (error) {
+      console.error('Error al consultar la tabla:', error);
+      res.status(500).json({ error: 'Error al consultar la base de datos' });
+    } else {
+      res.json(results);
+    }
+  });
+});
 
-  try {
-    const connection = await mysql.createConnection(dbConfig);
-    const [result] = await connection.query(
-      'INSERT INTO personas (nombre, edad) VALUES (?, ?)',
-      [nombre, edad]
-    );
-    connection.end();
-    res.json({ id: result.insertId, nombre, edad });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
+app.get('/', (req, res) => {
+  res.send("hola asbell");
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });
